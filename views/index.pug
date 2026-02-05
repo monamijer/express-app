@@ -2,4 +2,15 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title} my dear friend #{name}
+  p Welcome to #[em Local library], a very Express basic website, as a tutorial example developped by Monami Jerome 
+
+  h2 Dynamic Content
+
+  p the library has the following records count
+
+  ul
+    li #[strong Books:] !{book_count}
+    li #[strong Copies:] !{book_instance_count}
+    li #[strong Copies available:] !{book_instance_available_count}
+    li #[strong Author:] !{author_count}
+    li #[strong Genre:] !{genre_count}
