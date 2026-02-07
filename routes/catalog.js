@@ -11,6 +11,7 @@ const router = express.Router();
 //
 // Book Routes 
 router.get('/', book_controller.index);
+router.get('/book/:id', book_controller.book_detail);
 router.get('/book/create', book_controller.book_create_get);
 router.post('/book/create', book_controller.book_create_post);
 router.get('/book/:id/update', book_controller.book_update_get);
@@ -21,6 +22,7 @@ router.get('/books', book_controller.book_list);
 // Author Router 
 
 router.get('/author/create', author_controller.author_create_get);
+router.get('/author/:id', author_controller.author_detail);
 router.post('/author/create', author_controller.author_create_post);
 router.get('/author/:id/update', author_controller.author_update_get);
 router.post('/author/:id/update', author_controller.author_update_post);
@@ -30,6 +32,7 @@ router.get('/authors', author_controller.author_list);
 
 // Genre routes 
 
+router.get('/genre/:id', genre_controller.genre_detail);
 router.get('/genre/create', genre_controller.genre_create_get);
 router.post('/genre/create', genre_controller.genre_create_post)
 router.get('/genre/:id/update', genre_controller.genre_update_get);
@@ -40,6 +43,7 @@ router.get('/genres', genre_controller.genre_list);
 
 // BookInstance routes 
 //
+router.get('/bookinstance/:id', bookinstance_controller.bookinstance_detail);
 router.get('/bookinstance/create', bookinstance_controller.bookinstance_create_get);
 router.post('/bookinstance/create', bookinstance_controller.bookinstance_create_post);
 router.get('/bookinstance/:id/update', bookinstance_controller.bookinstance_update_get);

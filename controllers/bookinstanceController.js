@@ -12,7 +12,16 @@ exports.bookinstance_list = async (req, res, next) => {
 // Display the detail page for a specific bookinstance
 
 exports.bookinstance_detail = async (req, res, next) => {
-  res.send(`NOT IMPLEMENTED: Bookinstance detail: ${req.params.id}`);
+  const bookInstance = await
+    Bookinstance.findById(req.params.id).populate('book').exec();
+  
+  if(bookInstance === null){
+    const err = new Error('BookInstance not found');
+    err.status=404;
+    return next(err);
+  };
+  
+  res.render('bookinstance_detail', {title: 'Book', bookinstance: bookInstance})
 };
 exports.bookinstance_create_get = async(req, res, next)=>{
   res.send(`NOT IMPLEMENTED: Bookinstance create get`)
