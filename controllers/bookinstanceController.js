@@ -1,4 +1,5 @@
-
+const { body, validationResult } = require('express-validator');
+const Book = require('../models/book');
 const Bookinstance = require("../models/bookinstance");
 
 //Display the list of all bookinstances
@@ -24,7 +25,8 @@ exports.bookinstance_detail = async (req, res, next) => {
   res.render('bookinstance_detail', {title: 'Book', bookinstance: bookInstance})
 };
 exports.bookinstance_create_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Bookinstance create get`)
+  //const allBooks = await Book.find({}, 'title').sort({ title: 1 }).exec();
+ //res.render('bookinstance_form', {title: 'Create Bookinstance'})
 }
 exports.bookinstance_create_post = async(req, res, next)=>{
   res.send(`NOT IMPLEMENTED: Bookinstance create post`)

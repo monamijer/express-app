@@ -1,3 +1,4 @@
+const { body, validationResult } = require("express-validator");
 const Book = require("../models/book");
 const Genre = require("../models/genre");
 
@@ -23,11 +24,34 @@ exports.genre_detail = async (req, res, next) => {
 
 };
 exports.genre_create_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Genre create get `)
+  res.render('genre_form', {title: 'Genre create'});
 }
-exports.genre_create_post = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Genre create post`)
-}
+exports.genre_create_post = [
+  body('name', 'Genre name must contain at least 3 characters')
+      .trim()
+      .isLength({ min: 3 })
+      .escape(),
+  async(req, res, next)=>{
+    const errors = validationResult(req);
+    const genre = new Genre({ name: req.body.name });
+
+    if(!errors.isEmpty()){
+      res.render('genre_form', {title: 'Create Genre', genre, errors: errors.array(),});
+      return;
+    };
+    const genreExists = await Genre.findOne({ name: req.body.name })
+          .collation({ locale: 'en', strength: 2})
+          .exec();
+  
+  if(genreExists){
+    res.redirect(genreExists.url);
+    return;
+};
+  await genre.save()
+  res.redirect(genre.url)
+},
+];
+
 exports.genre_update_get = async(req, res, next)=>{
   res.send(`NOT IMPLEMENTED: Genre update get`)
 }
