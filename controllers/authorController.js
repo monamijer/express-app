@@ -74,8 +74,28 @@ exports.author_update_post = async(req, res, next)=>{
   res.send(`NOT IMPLEMENTED: Author update post`)
 }
 exports.author_delete_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Author delete get`)
-}
+  const [ author, allBooksByAuthor ] = await Promise.all([
+    Author.findById(req.params.id).exec(),
+    Book.find({ author: req.params.id}, 'title summary').exec(),
+  ]);
+  if(author === null){
+    res.redirect('/catalog/authors');
+    return;
+  };
+  res.render(
+    'author_delete',
+    { title: 'Delete Author', author, author_books: allBooksByAuthor, }
+  );
+};
 exports.author_delete_post = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Author delete post`)
+  const [ author, allBooksByAuthor ] = await Promise.all([
+    Author.findById(req.params.id).exec(),
+    Book.find({ author: req.params.id }, 'title summary').exec(),
+  ]);
+  if(allBooksByAuthor.length > 0){
+    res.render('author_delete', {title: 'Delete Author', author, author_books: allBooksByAuthor,});
+    return;
+  }
+  await Author.findByIdAndDelete(req.body.authorId);
+  res.redirect('/catalog/authors');
 }
