@@ -169,6 +169,7 @@ exports.book_update_post = [
       summary: req.body.summary,
       isbn: req.body.isbn,
       genre: typeof req.body.isbn==='undefined'? []: [req.body.genre],
+      _id: req.params.id,
     });
 
     if(!errors.isEmpty()){
@@ -192,14 +193,31 @@ exports.book_update_post = [
         });
       return;
     }
-    const updateBook = await Book.findByIdAndUpdate(req.params.id, book, {});
-    res.redirect(updateBook.url);
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id, book, {});
+    res.redirect(updatedBook.url);
   }
 ]
 
 exports.book_delete_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Book delete get`)
+  const [ book, allBooksInstance ] = await Promise.all([
+    Book.findById( req.params.id ).populate('author').populate('genre').exec(),
+    BookInstance.find({ book: req.params.id }).exec(),
+  ]);
+  if(book===null){
+    res.redirect('/catalog/books');
+    return;
+  }
+  res.render('book_delete', { title: 'Delete Book', book, bookinstance: allBooksInstance });
 }
 exports.book_delete_post = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Book delete post`)
+  const [ book, allBooksInstance ] = await Promise.all([
+    Book.findById(req.params.id).populate('author').populate('genre').exec(),
+    BookInstance.find({ book: req.params.id }).exec(),
+  ]);
+  if(allBooksInstance.length > 0){
+    res.render('book_delete', { title: 'Delete Book', book, booinstance: allBooksInstance});
+    return;
+  }
+  await Book.findByIdAndDelete(req.body.bookId);
+  res.redirect('/catalog/books')
 }

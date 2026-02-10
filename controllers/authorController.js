@@ -32,22 +32,18 @@ exports.author_create_post = [
     .trim()
     .isLength({ min: 2 })
     .escape()
-    .withMessage('First name must be specified')
-    .isAlphanumeric()
-    .withMessage('First name has no alpha-numeric characters'),
+    .withMessage('First name must be specified'),
   body('family_name')
     .trim()
     .isLength({ min: 3 })
     .escape()
-    .withMessage('Family name must be specified')
-    .isAlphanumeric()
-    .withMessage('Family name has no alpha-numeric characters'),
+    .withMessage('Family name must be specified'),
   body('date_of_birth', 'Invalid date of birth')
-    .optional({ value: 'falsy' })
+    .optional({ values: 'falsy' })
     .isISO8601()
     .toDate(),
   body('date_of_death', 'Invalid date of death')
-    .optional({ value: 'falsy' })
+    .optional({ values: 'falsy' })
     .isISO8601()
     .toDate(),
   async(req, res, next)=>{
@@ -68,11 +64,55 @@ exports.author_create_post = [
   },
 ];
 exports.author_update_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Author update get`)
+  const author = await Author.findById(req.params.id).exec();
+
+  if(author === null){
+    const err= new Error('author not found');
+    err.status= 404;
+    return next(err);
+  }
+  res.render('author_form', {title: 'Update author', author});
 }
-exports.author_update_post = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Author update post`)
-}
+exports.author_update_post = [
+  body('first_name')
+      .trim()
+      .isLength({ min: 3 })
+      .withMessage('First name must have at least 3 characters')
+      .escape()
+      .withMessage('First name must be specified'),
+  body('family_name')
+      .trim()
+      .isLength({ min: 2})
+      .withMessage('Family name must have at least 2 characters')
+      .escape()
+      .withMessage('Family name must be specified'),
+  body('date_of_birth')
+      .optional({ values: 'falsy' })
+      .isISO8601()
+      .toDate(),
+  body('date_of_death')
+      .optional({ values: 'falsy' })
+      .isISO8601()
+      .toDate(),
+  async(req, res, next)=>{
+    const errors = validationResult(req);
+    
+    const author = new Author({
+      first_name: req.body.first_name,
+      family_name: req.body.family_name,
+      date_of_birth: req.body.date_of_birth,
+      date_of_death: req.body.date_of_death,
+      _id: req.params.id,
+    });
+    if(!errors.isEmpty()){
+      res.render('author_form', {title: 'Update Author', author, errors: errors.array(),});
+      return;
+    }
+    const updateAuthor = await Author.findByIdAndUpdate(req.params.id, author, {});
+    res.redirect(updateAuthor.url);
+  }
+]
+
 exports.author_delete_get = async(req, res, next)=>{
   const [ author, allBooksByAuthor ] = await Promise.all([
     Author.findById(req.params.id).exec(),

@@ -1,10 +1,10 @@
 const { body, validationResult } = require('express-validator');
 const Book = require('../models/book');
-const Bookinstance = require("../models/bookinstance");
+const BookInstance = require("../models/bookinstance");
 
 //Display the list of all bookinstances
 exports.bookinstance_list = async (req, res, next) => {
-  const allBookInstances = await Bookinstance.find()
+  const allBookInstances = await BookInstance.find()
         .populate()
         .exec();
   res.render('bookinstance_list', { title: 'Book instance list', bookinstance_list: allBookInstances })
@@ -14,7 +14,7 @@ exports.bookinstance_list = async (req, res, next) => {
 
 exports.bookinstance_detail = async (req, res, next) => {
   const bookInstance = await
-    Bookinstance.findById(req.params.id).populate('book').exec();
+    BookInstance.findById(req.params.id).populate('book').exec();
   
   if(bookInstance === null){
     const err = new Error('BookInstance not found');
@@ -69,14 +69,66 @@ exports.bookinstance_create_post = [
   }
 ]
 exports.bookinstance_update_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Bookinstance update get`)
+  const [ bookinstance, allBooks ] = await Promise.all([
+  BookInstance.findById(req.params.id).exec(),
+  Book.find( {bookinstance: req.params.id}, 'title').sort({ title: 1}).exec(),
+  ])
+  if(bookinstance===null){
+    res.redirect('/catalog/bookinstances');
+    return;
+  };
+  res.render('bookinstance_form', {title: 'BookInstance Update', book_list: allBooks, bookinstance});
 }
-exports.bookinstance_update_post = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Bookinstance update post`)
-}
+exports.bookinstance_update_post = [
+  body('book', 'Book must be specified')
+      .trim()
+      .isLength({ min: 1 })
+      .escape(),
+  body('imprint', 'Imprint must be specified')
+      .trim()
+      .isLength({ min: 1 })
+      .escape(),
+  body('status').escape(),
+  body('due_back', 'invalid date')
+      .optional({ values: 'falsy' })
+      .isISO8601()
+      .toDate(),
+  async(req, res, next)=>{
+    const errors = validationResult(req);
+
+    const bookinstance = new BookInstance({
+      book: req.body.book,
+      imprint: req.body.imprint,
+      status: req.body.status,
+      due_back: req.body.due_back,
+      _id: req.params.id,
+    });
+    if(!errors.isEmpty()){
+    const allBooks = await Book.find({}, title).sort({ title: 1}).exec();
+      res.render('bookinstance_form', {
+        title: 'Update BookInstance',
+        book_list: allBooks,
+        selected_book: bookInstance.book._id,
+        errors: errors.array(),
+        bookinstance: bookInstance, 
+      });
+      return;
+    }
+    const updatedBookInstance = await BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {});
+    res.redirect(updatedBookInstance.url);
+  }
+]
 exports.bookinstance_delete_get = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Bookinstance delete get`)
+  const bookinstance = await BookInstance.findById(req.params.id).exec();
+  if(bookinstance===null){
+    res.redirect('/catalog/bookinstances');
+    return;
+  };
+  res.render('bookinstance_delete', {title: 'Delete BookInstance', bookinstance});
 }
 exports.bookinstance_delete_post = async(req, res, next)=>{
-  res.send(`NOT IMPLEMENTED: Bookinstance delete post`)
+  
+  await BookInstance.findByIdAndDelete(req.body.bookinstanceId);
+  res.redirect('/catalog/bookinstances');
 }
+
