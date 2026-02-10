@@ -15,7 +15,8 @@ const http = require('http');
 const mongoose = require("mongoose");
 
 mongoose.set("strictQuery", false);
-const mongoDb = "mongodb+srv://jer:monami123@cluster0.4ogvmn3.mongodb.net/?appName=locallibrary";
+const dev_db_url = "mongodb+srv://jer:monami123@cluster0.4ogvmn3.mongodb.net/?appName=locallibrary";
+const mongoDb = process.env.MONGODB_URI || dev_db_url;
 async function connectMongoose(){
     await mongoose.connect(mongoDb);
 }

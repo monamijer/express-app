@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const Author = require("../models/author");
 const Book = require("../models/book");
+const debug = require('debug')('author');
 
 //Display the list of all authors
 exports.author_list = async (req, res, next) => {
@@ -67,6 +68,7 @@ exports.author_update_get = async(req, res, next)=>{
   const author = await Author.findById(req.params.id).exec();
 
   if(author === null){
+    debug(`id not found on update': ${req.params.id} `)
     const err= new Error('author not found');
     err.status= 404;
     return next(err);

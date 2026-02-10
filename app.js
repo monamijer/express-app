@@ -1,13 +1,20 @@
 const createError = require("http-errors");
 const express = require("express");
+const compression = require('compression');
+const helmet = require('helmet');
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+const RateLimit= require('express-rate-limit');
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const catalogRouter = require("./routes/catalog");
 
+const limiter = RateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 20,
+})
 const app = express();
 
 // view engine setup
@@ -18,6 +25,15 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(compression());
+app.use(limiter);
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      'script-src': ["'self'", "cdn.jsdelivr.net"],
+    },
+  }),
+);
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
