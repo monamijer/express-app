@@ -8,6 +8,7 @@
     "serverstart": "DEBUG=locallibrary-tutorial:* npm run devstart"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "debug": "^4.4.1",
