@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= title
+
+  p
+    a(href="/users/create") Create new user
+
+  ul
+    each user in user_list
+      li
+        a(href=user.url) #{user.fullname}
+        |  — #{user.email}
+    else
+      li There are no users.
