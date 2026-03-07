@@ -10,6 +10,7 @@ const RateLimit= require('express-rate-limit');
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const catalogRouter = require("./routes/catalog");
+const adminRouter = require("./routes/admin");
 
 const limiter = RateLimit({
   windowMs: 1 * 60 * 1000,
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/catalog", catalogRouter);
+app.use("/admin", adminRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
